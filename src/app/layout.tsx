@@ -8,6 +8,7 @@ import { cookieToInitialState } from 'wagmi'
 import { getConfig } from '../wagmi'
 import { Providers } from './providers'
 import Link from 'next/link'
+import ConnectWallet from '@/components/connectWallet'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,15 +25,18 @@ export default async function RootLayout(props: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className='flex'>
+        <div className='flex ml-2 my-2'>
           <h1 className='text-3xl text-center px-4 py-2 bg-purple-500 rounded text-white'>
             <Link href="/ethers">ethers</Link>
           </h1>
-          <h1 className='text-3xl text-center px-4 py-2 bg-purple-500 rounded text-white'>
+          <h1 className='text-3xl ml-2 text-center px-4 py-2 bg-purple-500 rounded text-white'>
             <Link href="/wagmi">wagmi</Link>
           </h1>
         </div>
-        <Providers initialState={initialState}>{props.children}</Providers>
+        <Providers initialState={initialState}>
+          <ConnectWallet />
+          {props.children}
+        </Providers>
       </body>
     </html>
   )

@@ -4,11 +4,12 @@ import { useAccount, useReadContract, useBalance } from 'wagmi'
 import { tokenAbi } from '../../abis/tokenAbi'
 import { sepolia } from 'wagmi/chains'
 
-// ERC20合约地址
-const TOKEN_ADDRESS = '0xFaEE12073Da53f529b5F4485Ad587b2D1DD81b44' as `0x${string}`
+interface TransferEthersProps {
+  tokenAddress: string
+}
 
 // 显示ERC20合约余额组件
-export default function ShowTokenBalanceOf() {
+export default function ShowTokenBalanceOf({ tokenAddress }: TransferEthersProps) {
   const { address, isConnected, chainId } = useAccount()
 
   // 读取账户余额
@@ -17,7 +18,7 @@ export default function ShowTokenBalanceOf() {
   // 读取ERC20合约代币余额
   const { data: balance, error } = useReadContract({
     abi: tokenAbi,
-    address: TOKEN_ADDRESS,
+    address: tokenAddress as `0x${string}`,
     functionName: 'balanceOf',
     args: [address!],
     query: { enabled: !!address }

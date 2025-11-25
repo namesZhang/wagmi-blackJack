@@ -16,7 +16,7 @@ export function getConfig() {
     ssr: true,
     transports: {
       [mainnet.id]: http(),
-      [sepolia.id]: http(),
+      [sepolia.id]: http('https://sepolia.infura.io/v3/f9d85d16d7fd4bb3b4f72b88bc2ad1e8'),
     },
   })
 }

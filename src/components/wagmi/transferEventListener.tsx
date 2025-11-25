@@ -1,6 +1,7 @@
 import { useWatchContractEvent, useAccount } from "wagmi";
 import { tokenAbi } from "@/abis/tokenAbi";
 import { useEffect, useState } from "react";
+import { sepolia } from "wagmi/chains";
 
 interface TransferEvent {
   from: string,
@@ -9,16 +10,16 @@ interface TransferEvent {
   transactionHash: string
 }
 
-// ERC20合约地址
-const TOKEN_ADDRESS = '0xFaEE12073Da53f529b5F4485Ad587b2D1DD81b44' as `0x${string}`
+interface TransferEthersProps {
+  tokenAddress: string
+}
 
-export default function TransferEventListener() {
-  const { address } = useAccount() // 获取当前链接钱包的账户地址
+export default function TransferEventListener({ tokenAddress }: TransferEthersProps) {
   const [transfers,setTransfers] = useState<TransferEvent[]>([])
 
   // 监听transfer事件
   useWatchContractEvent({
-    address: TOKEN_ADDRESS,
+    address: tokenAddress as `0x${string}`,
     abi: tokenAbi,
     eventName: 'Transfer',
     onLogs: (logs) => {
@@ -44,7 +45,8 @@ export default function TransferEventListener() {
           setTransfers(prev => [newTransfer, ...prev.slice(0, 9)]) // 只保留最近10条
         }
       })
-    }
+    },
+    chainId: sepolia.id,
   })
 
   return (

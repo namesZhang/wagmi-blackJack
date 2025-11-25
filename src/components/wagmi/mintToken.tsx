@@ -10,17 +10,19 @@ import {
 import { tokenAbi } from '../../abis/tokenAbi'
 import { useState } from 'react'
 
-// ERC20合约地址
-const TOKEN_ADDRESS = '0xFaEE12073Da53f529b5F4485Ad587b2D1DD81b44' as `0x${string}`
+interface TransferEthersProps {
+  tokenAddress: string
+}
+
 // ERC20合约铸造代币组件
-export default function MintToken() {
+export default function MintToken({ tokenAddress }: TransferEthersProps) {
   const { address, isConnected, chain } = useAccount() // 获取账户地址和连接状态
   const [mintAmount, setMintAmount] = useState('1')
 
   // 检查合约代码是否存在
   const { data: contractCode } = useReadContract({
     abi: tokenAbi,
-    address: TOKEN_ADDRESS,
+    address: tokenAddress as `0x${string}`,
     functionName: 'name', // 尝试读取任何函数来检查合约是否存在
   })
   console.log('contractCode====',contractCode);
@@ -28,7 +30,7 @@ export default function MintToken() {
   // 读取合约，获取合约地址的余额
   const { data: balance, refetch: refetchBalance } = useReadContract({
     abi: tokenAbi,
-    address: TOKEN_ADDRESS,
+    address: tokenAddress as `0x${string}`,
     functionName: 'balanceOf',
     args: [address!],
     query: { enabled: !!address }
@@ -43,7 +45,7 @@ export default function MintToken() {
     const amount = BigInt(Number(mintAmount) * 10 ** 18) // 考虑小数位
     writeContract({
       abi: tokenAbi,
-      address: TOKEN_ADDRESS,
+      address: tokenAddress as `0x${string}`,
       functionName: 'mint',
       args: [amount]
     })
