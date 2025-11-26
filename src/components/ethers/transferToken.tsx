@@ -18,7 +18,7 @@ export default function TransferTokenEthers({ tokenAddress }:TransferEthersProps
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
 
-  connectMetaMask()
+  if (!isConnected) connectMetaMask()
   // 转账方法
   const handleTransfer = async () => {
     if (!address || !isConnected) {

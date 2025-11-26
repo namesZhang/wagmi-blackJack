@@ -21,8 +21,8 @@ export default function TransferEventListener({ tokenAddress }: TransferEthersPr
 
   useEffect(() => {
     if (!tokenAddress) return
-
     let contract
+    let arr = []
     const startListening = () => {
       try {
         const provider = new ethers.BrowserProvider((window as any).ethereum)
@@ -36,24 +36,8 @@ export default function TransferEventListener({ tokenAddress }: TransferEthersPr
             value,
             transactionHash: event.transactionHash
           }
-          // 添加交易数据
-          setTransfers(prev => {
-            const transactionHashes = new Set();
-            const uniqueTransfers = [];
-            // 先添加新交易
-            if (!transactionHashes.has(newTransfer.transactionHash)) {
-              transactionHashes.add(newTransfer.transactionHash);
-              uniqueTransfers.push(newTransfer);
-            }
-            // 然后添加旧交易（不重复的）
-            for (const transfer of prev) {
-              if (!transactionHashes.has(transfer.transactionHash) && uniqueTransfers.length < 10) {
-                transactionHashes.add(transfer.transactionHash);
-                uniqueTransfers.push(transfer);
-              }
-            }
-            return uniqueTransfers;
-          })
+          arr.push(newTransfer)
+          setTransfers(arr)
         })
         console.log('开始监听Transfer事件...')
       } catch(error) {
@@ -62,7 +46,7 @@ export default function TransferEventListener({ tokenAddress }: TransferEthersPr
     }
 
     startListening()
-  })
+  },[])
   
   return (
     <div className="p-6 border rounded-lg bg-white">
