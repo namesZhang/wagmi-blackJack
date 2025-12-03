@@ -1,6 +1,6 @@
 'use client'
 import { useEffect } from 'react'
-import {useStaking} from '@/hooks/useStaking'
+import { useStaking } from '@/hooks/useStaking'
 import { useState } from 'react'
 
 // 质押组件

@@ -1,7 +1,7 @@
 'use client'
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useWaitForCallsStatus } from "wagmi";
 import { stakeAbi } from "@/assets/abis/stakeAbi";
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 // 质押合约地址
 const STAKE_CONTRACT = '0xF136927bB54709e548fC77F7ee9947b5Ef3136ff'
@@ -29,14 +29,6 @@ export function useStaking(pid: number = 0) {
     return amount.toFixed(4)
   }, [userInfo])
 
-  // 根绝用户信息的pendingMetaNode判断是否可领取
-  const formattedClaimAmount = useMemo(() => {
-    if (!userInfo?.[2]) return '0.0000'
-    const amount = Number(userInfo[2]) / 10**18
-    console.log('formattedClaimAmount',amount);
-    return amount.toFixed(4)
-  },[userInfo])
-
   // 读取已质押的代币
   const { data: stakedBalance, refetch: refetchStaked } = useReadContract({
     address: STAKE_CONTRACT,
@@ -47,6 +39,33 @@ export function useStaking(pid: number = 0) {
       enabled: !!address
     }
   })
+
+  // 获取可领取的奖励
+  // 注：用户信息里的pendingMetaNode不是实时的
+  const { data: pendingMetaNode, refetch: refetchPendingMetaNode } = useReadContract({
+    address: STAKE_CONTRACT,
+    abi: stakeAbi,
+    functionName: 'pendingMetaNode',
+    args: [BigInt(pid),address!],
+    query: {
+      enabled: !!address
+    }
+  })
+
+  // 格式化可领取奖励pendingMetaNode
+  const formattedPendingMetaNode = useMemo(() => {
+    if (!pendingMetaNode) return '0.0000'
+    const amount = Number(pendingMetaNode) / 10**18
+    return amount.toFixed(4)
+  },[pendingMetaNode])
+
+  // 定期刷新奖励数据
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetchPendingMetaNode()
+    }, 60000)
+    return () => clearInterval(interval)
+  }, [refetchPendingMetaNode])
 
   // 读取可赎回总代币和赎回中的代币
   const { data: withDrawData, refetch: refetchWithDrawData } = useReadContract({
@@ -144,11 +163,11 @@ export function useStaking(pid: number = 0) {
   }
 
   // 交易确认后刷新数据
-  const refetchAll = () => {
+  const refetchAll = useCallback(() => {
     refetchStaked()
     refetchUserInfo() // 刷新用户数据
     refetchWithDrawData() // 刷新用户赎回数据
-  }
+  },[refetchStaked,refetchUserInfo,refetchWithDrawData])
 
   return {
     // 数据
@@ -156,7 +175,7 @@ export function useStaking(pid: number = 0) {
     stakedBalance,
     withDrawData,
     formattedStakedAmount,
-    formattedClaimAmount,
+    formattedPendingMetaNode,
     // 操作函数
     handleStake,
     handleUnstake,
