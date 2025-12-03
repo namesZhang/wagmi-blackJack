@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { tokenAbi } from "@/abis/tokenAbi";
+import { tokenAbi } from "@/assets/abis/tokenAbi";
 
 interface EthersBalanceProps {
   tokenAddress: string,

@@ -7,7 +7,7 @@ import {
   useReadContract,
   useChainId
 } from 'wagmi'
-import { tokenAbi } from '../../abis/tokenAbi'
+import { tokenAbi } from '../../assets/abis/tokenAbi'
 import { useState } from 'react'
 
 interface TransferEthersProps {

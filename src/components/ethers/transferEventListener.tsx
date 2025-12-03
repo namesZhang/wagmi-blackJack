@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import { tokenAbi } from "@/abis/tokenAbi";
+import { tokenAbi } from "@/assets/abis/tokenAbi";
 
 // 转账组件接口
 interface TransferEthersProps {

@@ -1,5 +1,5 @@
 import { useWatchContractEvent, useAccount } from "wagmi";
-import { tokenAbi } from "@/abis/tokenAbi";
+import { tokenAbi } from "@/assets/abis/tokenAbi";
 import { useEffect, useState } from "react";
 import { sepolia } from "wagmi/chains";
 

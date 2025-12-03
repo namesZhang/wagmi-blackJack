@@ -2,7 +2,7 @@
 import { useState } from "react"
 import { ethers } from "ethers"
 import { useAccount } from "wagmi"
-import { tokenAbi } from "@/abis/tokenAbi"
+import { tokenAbi } from "@/assets/abis/tokenAbi"
 import TransferEventListener from "./transferEventListener"
 
 // 转账组件接口

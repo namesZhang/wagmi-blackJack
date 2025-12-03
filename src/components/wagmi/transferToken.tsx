@@ -1,7 +1,7 @@
 'use client'
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { useState } from "react";
-import { tokenAbi } from "../../abis/tokenAbi";
+import { tokenAbi } from "../../assets/abis/tokenAbi";
 import TransferEventListener from './transferEventListener'
 
 // 转账组件接口

@@ -1,7 +1,7 @@
 'use client'
 
 import { useAccount, useReadContract, useBalance } from 'wagmi'
-import { tokenAbi } from '../../abis/tokenAbi'
+import { tokenAbi } from '../../assets/abis/tokenAbi'
 import { sepolia } from 'wagmi/chains'
 
 interface TransferEthersProps {
