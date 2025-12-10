@@ -40,11 +40,12 @@ export default function Stake() {
 
   // 使用 useEffect 监听状态变化
   useEffect(() => {
-    if (isConfirmStaked === false) { // 交易确认完成
+    if (isConfirmStaked) { // 交易确认完成
       refetchAll()
       refetchBalance()
     }
-  }, [isConfirmStaked, refetchAll, refetchBalance])
+  }, [isConfirmStaked])
+
   return (
     <div className='max-w-3xl mx-auto px-3'>
       <h1 className='text-4xl text-blue-400 text-center pt-7 pb-6'>MetaNode Stake</h1>
@@ -70,7 +71,7 @@ export default function Stake() {
         </div>
         <div className='my-5 mx-8'>
           <button
-            disabled={isStaking || !validateInput(stakeAmount).isValid || isConfirmStaked}
+            disabled={isStaking || !validateInput(stakeAmount).isValid}
             onClick={() => handleStake(stakeAmount)}
             className='w-full py-3 sm:py-5 text-lg bg-blue-500 text-white rounded disabled:bg-gray-400'
           >

@@ -20,6 +20,7 @@ export default function ShowEthersBalance({
   const fetchBalance = async () => {
     try {
       // 获取EthersV6Provider
+      // 服务端JsonRpcProvider  客户端BrowserProvider
       const provider = new ethers.JsonRpcProvider(rpcUrl)
       // 创建合约实例
       const contract = new ethers.Contract(tokenAddress, tokenAbi, provider)

@@ -38,8 +38,8 @@ export default function TransferTokenEthers({ tokenAddress }:TransferEthersProps
       const singer = await provider.getSigner() // 转账签名
       const contract = new ethers.Contract(tokenAddress,tokenAbi,singer) // 读取合约
       // 获取当前账户地址
-        const address = singer.getAddress();
-        console.log('连接账户:', address);
+      const address = singer.getAddress();
+      console.log('连接账户:', address);
       // 发送交易 并设置返回的交易hash
       const tx = await contract.transfer(toAddress,ethers.parseUnits(amount, 18))
 

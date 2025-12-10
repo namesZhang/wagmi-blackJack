@@ -1,7 +1,5 @@
 'use client'
-import { useEffect, useMemo } from 'react'
 import {useStaking} from '@/hooks/useStaking'
-import { useState } from 'react'
 
 // 质押组件
 export default function Claim() {

@@ -80,25 +80,25 @@ export function useStaking(pid: number = 0) {
 
   // 质押操作 stake
   const { writeContract: stake, data: stakeHash, isPending: isStaking } = useWriteContract()
-  const { isLoading: isConfirmStaked } = useWaitForTransactionReceipt({
+  const { isSuccess: isConfirmStaked, status: stakeStatus } = useWaitForTransactionReceipt({
     hash: stakeHash
   })
 
   // 解质押 unstake
   const { writeContract: unstake, data: unstakeHash, isPending: isUnstaking  } = useWriteContract()
-  const { isLoading: isConfirmUnstaked } = useWaitForTransactionReceipt({
+  const { isSuccess: isConfirmUnstaked } = useWaitForTransactionReceipt({
     hash: unstakeHash
   })
 
   // 赎回 withDraw
   const { writeContract: withDraw, data: withDrawHash, isPending: isWithDrawing } = useWriteContract()
-  const { isLoading: isConfirmWithDrawed } = useWaitForTransactionReceipt({
+  const { isSuccess: isConfirmWithDrawed } = useWaitForTransactionReceipt({
     hash: withDrawHash
   })
 
   // 领取奖励 claim
   const { writeContract: claim, data: claimHash, isPending: isClaiming } = useWriteContract()
-  const { isLoading: isClaimed } = useWaitForTransactionReceipt({
+  const { isSuccess: isClaimed } = useWaitForTransactionReceipt({
     hash: claimHash
   })
 
@@ -184,6 +184,7 @@ export function useStaking(pid: number = 0) {
     refetchAll,
     // 加载状态
     isStaking: isStaking,
+    stakeStatus,
     isConfirmStaked,
     isUnstaking,
     isConfirmUnstaked,

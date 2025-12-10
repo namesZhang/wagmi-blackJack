@@ -1,5 +1,5 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useStaking } from '@/hooks/useStaking'
 import { useState } from 'react'
 
@@ -13,19 +13,22 @@ export default function WithDraw() {
     formattedStakedAmount,
     isUnstaking,
     isConfirmUnstaked,
-    userInfo,
     refetchAll
   } = useStaking()
   const [ UnstakeAmount, setUnStakeAmount ] = useState<string>('0')
-  console.log('userInfo:::',userInfo);
-  console.log('withDrawData:::',withDrawData);
+
+  // 解质押按钮禁用
+  const unStakeDisabled = useMemo(() => {
+    return isUnstaking || Number(UnstakeAmount) <= 0
+  }, [isUnstaking,UnstakeAmount])
   
   // 使用 useEffect 监听状态变化
   useEffect(() => {
-    if (isConfirmUnstaked === false) { // 交易确认完成
+    if (isConfirmUnstaked) { // 交易确认完成
       refetchAll()
     }
-  }, [isConfirmUnstaked, refetchAll])
+  }, [isConfirmUnstaked])
+  
   return (
     <div className='max-w-3xl mx-auto px-3'>
       <h1 className='text-4xl text-blue-400 text-center pt-7 pb-6'>Withdraw</h1>
@@ -65,7 +68,7 @@ export default function WithDraw() {
         </div>
         <div className='my-5 mx-8'>
           <button
-            disabled={isUnstaking || Number(UnstakeAmount) <= 0}
+            disabled={unStakeDisabled}
             onClick={() => handleUnstake(UnstakeAmount)}
             className='w-full py-3 sm:py-5 text-lg bg-blue-500 text-white rounded disabled:bg-gray-400'
           >
