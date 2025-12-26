@@ -30,7 +30,7 @@ export default function TransferToken({ tokenAddress }: TransferEthersProps) {
   }
 
   return (
-    <div className="w-screen p-6 border rounded space-y-4 mb-2.5">
+    <div className="max-w-3xl mx-auto px-3 bg-gray-50 p-6 border rounded space-y-4 mb-2.5">
       {/* 接收转账地址 */}
       <div>
         <label>接收地址</label>

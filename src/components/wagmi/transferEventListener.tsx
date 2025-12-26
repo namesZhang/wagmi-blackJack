@@ -50,7 +50,7 @@ export default function TransferEventListener({ tokenAddress }: TransferEthersPr
   })
 
   return (
-    <div className="p-6 border rounded-lg bg-white">
+    <div className="max-w-3xl mx-auto px-3 bg-gray-50 p-6 border rounded-lg">
       <h3 className="text-lg font-semibold mb-4">实时转账事件监听</h3>
       <div>
         {transfers.map((transfer,index) => (

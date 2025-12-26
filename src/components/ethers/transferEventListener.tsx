@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { tokenAbi } from "@/assets/abis/tokenAbi";
+import { useWallet } from "@/wallet-sdk/privader";
 
 // 转账组件接口
 interface TransferEthersProps {
@@ -18,14 +19,13 @@ interface TransferEvent {
 // Ethers.js 转账监听组件
 export default function TransferEventListener({ tokenAddress }: TransferEthersProps) {
   const [transfers, setTransfers] = useState<TransferEvent[]>([])
-
+  const { provider } = useWallet()
   useEffect(() => {
     if (!tokenAddress) return
     let contract
     let arr = []
     const startListening = () => {
       try {
-        const provider = new ethers.BrowserProvider((window as any).ethereum)
         contract = new ethers.Contract(tokenAddress,tokenAbi,provider)
 
         // 监听事件

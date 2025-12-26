@@ -1,8 +1,8 @@
 'use client'
 
-import { useAccount, useReadContract, useBalance } from 'wagmi'
+import { useReadContract, useBalance } from 'wagmi'
 import { tokenAbi } from '../../assets/abis/tokenAbi'
-import { sepolia } from 'wagmi/chains'
+import { useWallet } from '@/wallet-sdk/privader'
 
 interface TransferEthersProps {
   tokenAddress: string
@@ -10,21 +10,26 @@ interface TransferEthersProps {
 
 // 显示ERC20合约余额组件
 export default function ShowTokenBalanceOf({ tokenAddress }: TransferEthersProps) {
-  const { address, isConnected, chainId } = useAccount()
+  const { address, isConnected, chainId } = useWallet()
+  const walletAddress = address as `0x${string}`
 
   // 读取账户余额
-  const { data: nativeBalance } = useBalance({ address })
+  const { data: nativeBalance } = useBalance({
+    address: walletAddress,
+    chainId: chainId as any,
+    query: {
+      enabled: !!address
+    }
+  })
 
   // 读取ERC20合约代币余额
-  const { data: balance, error } = useReadContract({
+  const { data: balance } = useReadContract({
     abi: tokenAbi,
     address: tokenAddress as `0x${string}`,
     functionName: 'balanceOf',
     args: [address!],
     query: { enabled: !!address }
   })
-
-  
 
   // 判断是否接入钱包
   if (!isConnected) {
@@ -35,32 +40,21 @@ export default function ShowTokenBalanceOf({ tokenAddress }: TransferEthersProps
     )
   }
 
-  // 判断当前网络是否sepolia测试网
-  if (chainId !== sepolia.id) {
-    return (
-      <div className="p-4 border border-red-200 bg-red-50 rounded">
-        <p>🌐 网络错误</p>
-        <p>当前网络: {chainId}，应该是: {sepolia.id} (Sepolia)</p>
-        <p>请在 MetaMask 中切换到 Sepolia 测试网</p>
-      </div>
-    )
-  }
-
   return (
-    <div className="p-6 border rounded space-y-4">
+    <div className="p-6 border rounded space-y-4 max-w-3xl mx-auto px-3 bg-gray-50 mb-2.5">
       <h2 className="text-xl font-bold">SepoliaETH余额</h2>
       {/* 基础信息 */}
       <div className="p-4 border bg-gray-50 rounded space-y-2">
         <p>💰 SepoliaETH 余额: {nativeBalance?.formatted} ETH</p>
         <p>📝 钱包地址: {address}</p>
-        <p>🌐 当前网络: Sepolia (ID: {chainId})</p>
+        <p>🌐 当前网络: Sepolia (ID: {Number(chainId)})</p>
       </div>
       {/* 代币信息显示 */}
       <h2 className="text-xl font-bold">ERC20合约代币余额</h2>
       <div className="p-4 border bg-gray-50 rounded space-y-2">
         <p>✅ ERC20 余额: {balance ? (Number(balance) / 10 ** 18).toLocaleString() : '0'} ERC20</p>
         <p>💰 钱包地址: {address}</p>
-        <p>🌐 当前网络: Sepolia (ID: {chainId})</p>
+        <p>🌐 当前网络: Sepolia (ID: {Number(chainId)})</p>
       </div>
     </div>
   )

@@ -1,9 +1,9 @@
 'use client'
 import { useState } from "react"
 import { ethers } from "ethers"
-import { useAccount } from "wagmi"
 import { tokenAbi } from "@/assets/abis/tokenAbi"
 import TransferEventListener from "./transferEventListener"
+import { useWallet } from "@/wallet-sdk/privader"
 
 // 转账组件接口
 interface TransferEthersProps {
@@ -12,13 +12,12 @@ interface TransferEthersProps {
 
 // Ethers.js 转账组件
 export default function TransferTokenEthers({ tokenAddress }:TransferEthersProps) {
-  const { address, isConnected } = useAccount()
+  const { address, isConnected, provider } = useWallet()
   const [toAddress, setToAddress]  = useState<string>('')
   const [amount, setAmount] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
 
-  if (!isConnected) connectMetaMask()
   // 转账方法
   const handleTransfer = async () => {
     if (!address || !isConnected) {
@@ -34,11 +33,9 @@ export default function TransferTokenEthers({ tokenAddress }:TransferEthersProps
 
     try {
       // 使用Ethers.js 先创建Provider，用于访问区块链网络
-      const provider = new ethers.BrowserProvider((window as any).ethereum)
-      const singer = await provider.getSigner() // 转账签名
+      // const provider = new ethers.BrowserProvider((window as any).ethereum)
+      const singer = await provider?.getSigner() // 转账签名
       const contract = new ethers.Contract(tokenAddress,tokenAbi,singer) // 读取合约
-      // 获取当前账户地址
-      const address = singer.getAddress();
       console.log('连接账户:', address);
       // 发送交易 并设置返回的交易hash
       const tx = await contract.transfer(toAddress,ethers.parseUnits(amount, 18))
@@ -52,25 +49,6 @@ export default function TransferTokenEthers({ tokenAddress }:TransferEthersProps
       setError(err.message || '转账失败')
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  async function connectMetaMask() {
-    try {
-      // 请求账户访问权限
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-      
-      // 创建 ethers provider
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      
-      // 获取签名者
-      const signer = await provider.getSigner();
-      const userAddress = await signer.getAddress();
-      
-      console.log('已连接 MetaMask 钱包:', userAddress);
-      return { provider, signer, userAddress };
-    } catch (error) {
-      console.error('连接 MetaMask 失败:', error);
     }
   }
 

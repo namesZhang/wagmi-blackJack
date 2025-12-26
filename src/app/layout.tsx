@@ -28,7 +28,6 @@ export default async function RootLayout(props: { children: ReactNode }) {
       <body className={inter.className}>
         <Providers initialState={initialState}>
           <div className='h-screen bg-gray-800 overflow-scroll'>
-            <Header />
             <div className='w-screen pb-8'>
               {props.children}
             </div>

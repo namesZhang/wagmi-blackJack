@@ -9,3 +9,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-wagmi
 5. 监听 ERC-20 合约的 Transfer 事件
 
 
+# 链接钱包组件思路整理
+1. 数据状态的管理使用 React原有的Context
+2. 文件夹目录 wallet-sdk provider components connectors
+3. 统一的ts类型管理 walletContextvalue 钱包上下文接口 walletState 钱包状态接口 chain 类型
+4. 

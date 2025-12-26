@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { tokenAbi } from "@/assets/abis/tokenAbi";
+import { useWallet } from "@/wallet-sdk/privader";
 
 interface EthersBalanceProps {
   tokenAddress: string,
@@ -13,15 +14,15 @@ interface EthersBalanceProps {
 export default function ShowEthersBalance({
   tokenAddress,
   rpcUrl,
-  address
 }: EthersBalanceProps) {
   const [balanceOf,setBalance] = useState<string>('0')
   const [contractName,setContractName] = useState<string>('')
+  const { address, provider } = useWallet()
   const fetchBalance = async () => {
     try {
       // 获取EthersV6Provider
       // 服务端JsonRpcProvider  客户端BrowserProvider
-      const provider = new ethers.JsonRpcProvider(rpcUrl)
+      // const provider = new ethers.JsonRpcProvider(rpcUrl)
       // 创建合约实例
       const contract = new ethers.Contract(tokenAddress, tokenAbi, provider)
       // 读取合约余额信息

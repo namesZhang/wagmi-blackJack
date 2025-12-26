@@ -9,6 +9,7 @@ import {
 } from 'wagmi'
 import { tokenAbi } from '../../assets/abis/tokenAbi'
 import { useState } from 'react'
+import { useWallet } from '@/wallet-sdk/privader'
 
 interface TransferEthersProps {
   tokenAddress: string
@@ -16,7 +17,7 @@ interface TransferEthersProps {
 
 // ERC20合约铸造代币组件
 export default function MintToken({ tokenAddress }: TransferEthersProps) {
-  const { address, isConnected, chain } = useAccount() // 获取账户地址和连接状态
+  const { address, isConnected, chainId } = useWallet() // 获取账户地址和连接状态
   const [mintAmount, setMintAmount] = useState('1')
 
   // 检查合约代码是否存在
@@ -25,7 +26,6 @@ export default function MintToken({ tokenAddress }: TransferEthersProps) {
     address: tokenAddress as `0x${string}`,
     functionName: 'name', // 尝试读取任何函数来检查合约是否存在
   })
-  console.log('contractCode====',contractCode);
 
   // 读取合约，获取合约地址的余额
   const { data: balance, refetch: refetchBalance } = useReadContract({
@@ -35,9 +35,6 @@ export default function MintToken({ tokenAddress }: TransferEthersProps) {
     args: [address!],
     query: { enabled: !!address }
   })
-
-  // 当前账户的连接的网络ID
-  const chainId = useChainId()
 
   // 铸造代币方法
   const handleMint = () => {
@@ -57,13 +54,13 @@ export default function MintToken({ tokenAddress }: TransferEthersProps) {
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash })
 
   return (
-    <div className="p-6 border rounded space-y-4 max-w-6xl mb-2.5">
+    <div className="p-6 border rounded space-y-4 max-w-3xl mx-auto px-3 bg-gray-50 mb-2.5">
       <h2 className="text-xl font-bold">铸造代币</h2>
       {/* 状态概览 */}
       <div className="grid grid-cols-4 gap-4 text-sm">
         <div className="p-3 border rounded">
           <p>🔄 连接状态: {isConnected ? '✅ 已连接' : '❌ 未连接'}</p>
-          <p>🌐 网络: {chain?.name || '未知'}</p>
+          <p>🌐 网络: {chainId || '未知'}</p>
           <p>🆔 网络ID: {chainId}</p>
         </div>
         <div className="p-3 border rounded col-span-2">

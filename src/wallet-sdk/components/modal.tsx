@@ -1,21 +1,26 @@
 import React, { useState, useEffect, ReactNode } from 'react';
-import '../style/modal.css'
+import '@/style/modal.css'
+import { Wallet } from '@/wallet-sdk/type';
 
 type ModalType = 'default' | 'warning' | 'danger' | 'success' | 'info';
 
 interface ModalProps {
   isOpen: boolean,
   onClose: () => void,
-  title: string,
-  children: ReactNode,
-  type?: ModalType
+  wallets: Wallet[],
+  title?: string,
+  type?: ModalType,
+  connecting: boolean,
+  onSelectWallet: (wallet: Wallet) => void
 }
 
 const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
-  title,
-  children,
+  wallets,
+  title='钱包登录组件',
+  connecting,
+  onSelectWallet,
   type = 'default',
 }) => {
   useEffect(() => {
@@ -46,8 +51,20 @@ const Modal: React.FC<ModalProps> = ({
           <h2>{title}</h2>
           <button className="close-button" onClick={onClose}>×</button>
         </div>
+        {/* 渲染钱包list */}
         <div className="modal-body">
-          {children}
+          <div className='space-y-3 max-h-[60vh] overflow-y-auto pr-1'>
+            {wallets.map((wallet) => (
+              <div
+                key={wallet.id}
+                className='flex items-center p-2 rounded-lg hover:bg-gray-200 cursor-pointer'
+                onClick={() => onSelectWallet(wallet)}
+              >
+                <img src={wallet.icon} alt={wallet.name} className='w-6 h-6 mr-2' />
+                <span className='text-sm'>{wallet.name}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
