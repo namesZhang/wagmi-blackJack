@@ -6,6 +6,8 @@ import { useDisconnect, useSwitchChain } from 'wagmi';
 import SwitchChainModal from '../components/switchChainModal';
 import WalletStorage from '@/utils/storage';
 import { ethers } from 'ethers';
+import { log } from 'console';
+import { eventBus } from '@/utils/eventBus';
 
 const WalletContext = createContext<WalletContextValue>({
   connect: async () => { },
@@ -32,7 +34,8 @@ const WalletContext = createContext<WalletContextValue>({
   ensName: '',
   error: null,
   chains: [],
-  provider: undefined
+  provider: undefined,
+  signer: undefined
 })
 
 export const WalletPrivoder: React.FC<WalletProviderProps> = ({
@@ -52,6 +55,7 @@ export const WalletPrivoder: React.FC<WalletProviderProps> = ({
     error: null,
     chains,
     provider,
+    signer: null
   })
 
   // 声明弹框变量
@@ -76,13 +80,14 @@ export const WalletPrivoder: React.FC<WalletProviderProps> = ({
       }
       setWalletState({ ...walletState, isConnecting: true })
       try {
-        const { address, chainId, provider, shouldSwitchNetwork } = await wallet.connetc()
+        const { address, chainId, provider, shouldSwitchNetwork, signer } = await wallet.connetc()
         setWalletState({
           ...walletState,
           address,
           chainId,
           provider,
           isConnected: true,
+          signer
         })
         WalletStorage.saveWalletType(wallet.name)
         WalletStorage.saveAddress(address);
@@ -108,22 +113,50 @@ export const WalletPrivoder: React.FC<WalletProviderProps> = ({
       }
     },
     disconnect: async () => {
-      disconnect()
-      setWalletState({
-        ...walletState,
-        address: '',
-        chainId: -1,
-        isConnected: false,
-      })
+      // 断开钱包连接
+      if (walletState.provider) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_revokePermissions",
+            params: [
+              { eth_accounts: {} }
+            ]
+          });
+        } catch (error:any) {
+          if (error.code == -32601) {
+            window.ethereum.removeAllListeners('accountsChanged');
+            window.ethereum.removeAllListeners('chainChanged');
+            window.ethereum.removeAllListeners('disconnect');
+          }
+        }
+        // 清空数据
+        setWalletState({
+          ...walletState,
+          address: '',
+          chainId: -1,
+          isConnected: false,
+          signer: null,
+          provider: null
+        })
+        // 清除缓存
+        WalletStorage.clear()
+      }
+      
     },
     switchChain: async (chainId: number) => {
-      await switchChain({ chainId: chainId as any })
+      // await switchChain({ chainId: chainId as any })
+      console.log('walletState.provider',walletState.provider)
+      await  walletState.provider.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0x" + chainId.toString(16) }] // Sepolia 的 chainId（十六进制）
+      });
       WalletStorage.saveChainId(chainId);
       setWalletState({
         ...walletState,
         chainId
       })
       setchainModalOpen(false)
+      eventBus.emit('wallet:chainChanged',chainId)
     },
     openModal: function (): void {
       setModalOpen(true)

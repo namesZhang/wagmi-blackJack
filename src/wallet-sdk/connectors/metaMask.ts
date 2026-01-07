@@ -1,24 +1,30 @@
 import { ethers } from "ethers"
 import { Wallet } from "../type"
+import WalletStorage from "@/utils/storage"
 
 
 const connectMetamask = async (): Promise<any>  => {
   // 判断是否安装了metaMask
   try {
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-
+    console.log(accounts);
     if (!accounts || accounts.length == 0) {
       throw new Error('No Accounts Found')
     }
 
-    // 获取provider
+    // 获取provider,根据provider获取信息
     const provider = new ethers.BrowserProvider(window.ethereum)
-
-    // 获取用户钱包地址
+    console.log(provider);
+    
     const signer = await provider.getSigner()
     const address = await signer.getAddress()
-    const { chainId } = await provider.getNetwork()
+    const netWork = await provider.getNetwork()
+    let chainId = Number(netWork.chainId)
 
+    // 返回一个标志，申明是否需要切换网络
+    const savedWalletChainId = WalletStorage.getChainId()
+    const shouldSwitchNetwork = savedWalletChainId && savedWalletChainId !== -1 && savedWalletChainId !== chainId
+    
     // 监听连接账户的变化
     window.ethereum.on('accountsChanged',(newAccounts: string[]) => {
       if (newAccounts.length === 0) {
@@ -38,7 +44,7 @@ const connectMetamask = async (): Promise<any>  => {
       }))
     })
     console.log('connectMetamask:::', provider, signer, chainId, accounts, address);
-    return { accounts, signer, address, chainId }
+    return { accounts, signer, address, chainId, provider, shouldSwitchNetwork }
   } catch (error) {
     throw error
   }

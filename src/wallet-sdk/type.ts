@@ -9,6 +9,7 @@ export interface WalletStatus {
   error: Error | null;
   chains: Chain[];
   provider: any;
+  signer: any;
 }
 
 export type Chain = {

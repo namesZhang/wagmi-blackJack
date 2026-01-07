@@ -3,28 +3,32 @@ import { Wallet } from "../type"
 import WalletStorage from "@/utils/storage"
 
 
-const connectOkx = async (): Promise<any>  => {
+const connectOkx = async (): Promise<any> => {
   // 判断是否安装了metaMask
   try {
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-
+    // 请求账户访问权限 OKX钱包需要用window.okxwallet，不能用window.ethereum，window.ethereum默认连接的钱包账户是Metamask
+    const okxWallet = window.okxwallet
+    const accounts = await okxWallet.request({
+      method: 'eth_requestAccounts'
+    });
     if (!accounts || accounts.length == 0) {
       throw new Error('No Accounts Found')
     }
-
-    // 获取provider,根据provider获取信息
-    const provider = new ethers.BrowserProvider(window.ethereum)
-    const signer = await provider.getSigner()
-    const address = await signer.getAddress()
-    const netWork = await provider.getNetwork()
-    let chainId = Number(netWork.chainId)
+    const address = accounts[0];
+    console.log('已连接OKX账户',address)
+    const chainId = await okxWallet.request({
+      method: 'eth_chainId'
+    });
+    const provider = new ethers.BrowserProvider(okxWallet);
+    const signer = provider.getSigner();
+    const balance = await provider.getBalance(address);
 
     // 返回一个标志，申明是否需要切换网络
     const savedWalletChainId = WalletStorage.getChainId()
     const shouldSwitchNetwork = savedWalletChainId && savedWalletChainId !== -1 && savedWalletChainId !== chainId
 
     // 监听连接账户的变化
-    window.ethereum.on('accountsChanged',(newAccounts: string[]) => {
+    window.ethereum.on('accountsChanged', (newAccounts: string[]) => {
       if (newAccounts.length === 0) {
         window.dispatchEvent(new CustomEvent('wallet_disconnected'))
       } else {
@@ -35,13 +39,13 @@ const connectOkx = async (): Promise<any>  => {
     })
 
     // 监听区块链网络变化
-    window.ethereum.on('chainChanged',(newChainIdHex: string) => {
-      const newChainId = parseInt (newChainIdHex)
+    window.ethereum.on('chainChanged', (newChainIdHex: string) => {
+      const newChainId = parseInt(newChainIdHex)
       window.dispatchEvent(new CustomEvent('wallet_chain_changed', {
         detail: { chainId: newChainId }
       }))
     })
-    console.log('connectOXKwallet:::', provider, signer, chainId, accounts, address);
+    console.log('connectOXKwallet:::', provider, signer, chainId, accounts, address, balance);
     return { accounts, signer, address, chainId, provider, shouldSwitchNetwork }
   } catch (error) {
     throw error
