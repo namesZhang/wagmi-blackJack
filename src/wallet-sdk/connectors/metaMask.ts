@@ -13,38 +13,20 @@ const connectMetamask = async (): Promise<any>  => {
     }
 
     // 获取provider,根据provider获取信息
-    const provider = new ethers.BrowserProvider(window.ethereum)
+    const provider = window.ethereum
     console.log(provider);
     
-    const signer = await provider.getSigner()
-    const address = await signer.getAddress()
-    const netWork = await provider.getNetwork()
-    let chainId = Number(netWork.chainId)
+    // const signer = await provider.getSigner()
+    const address = accounts[0]
+    const chainId = await provider.request({
+      method: 'eth_chainId'
+    });
 
     // 返回一个标志，申明是否需要切换网络
     const savedWalletChainId = WalletStorage.getChainId()
     const shouldSwitchNetwork = savedWalletChainId && savedWalletChainId !== -1 && savedWalletChainId !== chainId
-    
-    // 监听连接账户的变化
-    window.ethereum.on('accountsChanged',(newAccounts: string[]) => {
-      if (newAccounts.length === 0) {
-        window.dispatchEvent(new CustomEvent('wallet_disconnected'))
-      } else {
-        window.dispatchEvent(new CustomEvent('wallet_accounts_changed', {
-          detail: { accounts: newAccounts }
-        }))
-      }
-    })
-
-    // 监听区块链网络变化
-    window.ethereum.on('chainChanged',(newChainIdHex: string) => {
-      const newChainId = parseInt (newChainIdHex)
-      window.dispatchEvent(new CustomEvent('wallet_chain_changed', {
-        detail: { chainId: newChainId }
-      }))
-    })
-    console.log('connectMetamask:::', provider, signer, chainId, accounts, address);
-    return { accounts, signer, address, chainId, provider, shouldSwitchNetwork }
+    console.log('connectMetamask:::', provider, chainId, accounts, address);
+    return { accounts, address, chainId, provider, shouldSwitchNetwork }
   } catch (error) {
     throw error
   }

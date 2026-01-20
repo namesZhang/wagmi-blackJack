@@ -41,17 +41,25 @@ export const ConnectButton = ({
   const chainInfo = chains.find(item => item.id == Number(chainId))
   
   const fetchBalance = useCallback(async () => {
-    const balanceWei = await provider.getBalance(address)
-    const balanceEth = ethers.formatEther(balanceWei)
-    console.log('balanceEth===',balanceEth);
-    setBalance(balanceEth)
+    if (!address || !provider) return
+
+    try {
+      const balanceWei = await provider.request({
+        method: 'eth_getBalance',
+        params: [address, 'latest']
+      })
+      const balanceEth = ethers.formatEther(balanceWei)
+      setBalance(balanceEth)
+    } catch(error) {
+      console.error('获取原生代币余额失败button',error)
+    }
   },[provider])
 
   useEffect(() => {
     if (address && provider) {
       fetchBalance()
     }
-  }, [fetchBalance, provider])
+  }, [fetchBalance, provider, chainId])
   // 格式化余额
   const formatBalance = (balance: string | undefined, decimals = 4) => {
     const balanceStr = balance ?? '0'; // 如果 undefined 则使用 '0'

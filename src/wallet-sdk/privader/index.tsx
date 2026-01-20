@@ -144,9 +144,7 @@ export const WalletPrivoder: React.FC<WalletProviderProps> = ({
       
     },
     switchChain: async (chainId: number) => {
-      // await switchChain({ chainId: chainId as any })
-      console.log('walletState.provider',walletState.provider)
-      await  walletState.provider.request({
+      await walletState.provider.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId: "0x" + chainId.toString(16) }] // Sepolia 的 chainId（十六进制）
       });

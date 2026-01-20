@@ -4,12 +4,8 @@ import { Inter } from 'next/font/google'
 import { headers } from 'next/headers'
 import { type ReactNode } from 'react'
 import { cookieToInitialState } from 'wagmi'
-
 import { getConfig } from '../wagmi'
 import { Providers } from './providers'
-import Link from 'next/link'
-import ConnectWallet from '@/components/connectWallet'
-import Header from '@/components/Header'
 
 const inter = Inter({ subsets: ['latin'] })
 

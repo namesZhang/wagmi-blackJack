@@ -19,9 +19,8 @@ const connectOkx = async (): Promise<any> => {
     const chainId = await okxWallet.request({
       method: 'eth_chainId'
     });
-    const provider = new ethers.BrowserProvider(okxWallet);
-    const signer = provider.getSigner();
-    const balance = await provider.getBalance(address);
+    const provider = window.okxwallet
+    // const signer = provider.getSigner();
 
     // 返回一个标志，申明是否需要切换网络
     const savedWalletChainId = WalletStorage.getChainId()
@@ -45,8 +44,8 @@ const connectOkx = async (): Promise<any> => {
         detail: { chainId: newChainId }
       }))
     })
-    console.log('connectOXKwallet:::', provider, signer, chainId, accounts, address, balance);
-    return { accounts, signer, address, chainId, provider, shouldSwitchNetwork }
+    console.log('connectOXKwallet:::', provider, chainId, accounts, address);
+    return { accounts, address, chainId, provider, shouldSwitchNetwork }
   } catch (error) {
     throw error
   }

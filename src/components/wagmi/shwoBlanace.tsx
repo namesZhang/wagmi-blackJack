@@ -41,7 +41,10 @@ export default function ShowTokenBalanceOf({ tokenAddress }: TransferEthersProps
     if (!address || !provider) return
 
     try {
-      const balanceWei = await provider.getBalance(address)
+      const balanceWei = await provider.request({
+      method: 'eth_getBalance',
+      params: [address, 'latest']
+    })
       const balanceEth = ethers.formatEther(balanceWei)
       console.log('balanceEth===',balanceEth);
       setEthBalance(balanceEth)
@@ -59,15 +62,29 @@ export default function ShowTokenBalanceOf({ tokenAddress }: TransferEthersProps
   }, [provider])
 
   // 获取ERC20token代币余额
+  const encodeBalanceOf = (address: string) => {
+    // balanceOf(address) 的函数选择器
+    const functionSelector = '0x70a08231'
+    
+    // 移除地址的 0x 前缀并填充到 64 字符
+    const paddedAddress = address.replace('0x', '').padStart(64, '0')
+    
+    return functionSelector + paddedAddress
+  }
+
   const fetchTokenBalance = useCallback(async () => {
-    if (!address || !provider) return
+    if (!address || !provider || Number(chainId) === 1) return
 
     try {
-      const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, provider)
-      const erc20Balance = await tokenContract.balanceOf(walletAddress)
+      const erc20Balance = await provider.request({
+        method: 'eth_call',
+        params: [{
+          to: tokenAddress,
+          data: encodeBalanceOf(address)
+        }, 'latest']
+      })
       console.log('erc20Balance===',ethers.formatUnits(erc20Balance, 18));
       setErc20Balance(ethers.formatUnits(erc20Balance, 18))
-
       // 注册余额更新事件
       eventBus.emit('balance:update', {
         address,
@@ -78,27 +95,7 @@ export default function ShowTokenBalanceOf({ tokenAddress }: TransferEthersProps
       console.error('获取token代币余额失败:', error);
       setErc20Balance('')
     }
-  }, [provider])
-  // 获取余额
-  const fetchBalance = useCallback(async () => {
-    try {
-      const result = await Promise.allSettled([
-        fetchEthBalance,
-        fetchTokenBalance
-      ])
-      console.log()
-      // 注册余额更新事件
-      // eventBus.emit('balance:update', {
-      //   address: tokenAddress,
-      //   balance: erc20Balance,
-      //   chainId: Number(chainId)
-      // })
-      // return balanceEth
-    } catch (error) {
-      console.error('获取余额失败:', error)
-      return null
-    }
-  }, [tokenAddress, provider])
+  }, [provider, chainId])
 
   // 监听相关事件自动刷新余额
   useEffect(() => {
@@ -120,7 +117,8 @@ export default function ShowTokenBalanceOf({ tokenAddress }: TransferEthersProps
     // 注册事件监听 监听交易完成
     eventBus.on('transaction:confirmed', handleTransactionConfirmed)
     // 注册事件监听 监听网络切换
-    eventBus.on('wallet:chainChanged', () => {
+    eventBus.on('wallet:chainChanged', (val) => {
+      console.log('valChainId',val)
       fetchEthBalance()
       fetchTokenBalance()
     })
@@ -128,8 +126,13 @@ export default function ShowTokenBalanceOf({ tokenAddress }: TransferEthersProps
     // 清理监听器
     return () => {
       eventBus.off('transaction:confirmed', handleTransactionConfirmed)
+      eventBus.off('wallet:chainChanged', (val) => {
+      console.log('valChainId',val)
+      fetchEthBalance()
+      fetchTokenBalance()
+    })
     }
-  }, [tokenAddress, provider, fetchBalance])
+  }, [tokenAddress, provider, chainId])
 
   // 判断是否接入钱包
   if (!isConnected) {
@@ -145,17 +148,19 @@ export default function ShowTokenBalanceOf({ tokenAddress }: TransferEthersProps
       <h2 className="text-xl font-bold">SepoliaETH余额</h2>
       {/* 基础信息 */}
       <div className="p-4 border bg-gray-50 rounded space-y-2">
-        <p>💰 SepoliaETH 余额: {ethBalance} ETH</p>
+        <p>💰 ETH 余额: {ethBalance} ETH</p>
         <p>📝 钱包地址: {address}</p>
-        <p>🌐 当前网络: Sepolia (ID: {Number(chainId)})</p>
+        <p>🌐 当前网络: (ID: {Number(chainId)})</p>
       </div>
       {/* 代币信息显示 */}
-      <h2 className="text-xl font-bold">ERC20合约代币余额</h2>
-      <div className="p-4 border bg-gray-50 rounded space-y-2">
-        <p>✅ ERC20 余额: {erc20Balance} ERC20</p>
-        <p>💰 钱包地址: {address}</p>
-        <p>🌐 当前网络: Sepolia (ID: {Number(chainId)})</p>
-      </div>
+      {Number(chainId) !== 1 && <div>
+        <h2 className="text-xl font-bold">ERC20合约代币余额</h2>
+        <div className="p-4 border bg-gray-50 rounded space-y-2">
+          <p>✅ ERC20 余额: {erc20Balance} ERC20</p>
+          <p>💰 钱包地址: {address}</p>
+          <p>🌐 当前网络: (ID: {Number(chainId)})</p>
+        </div>
+      </div> }
     </div>
   )
 }
